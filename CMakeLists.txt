@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 2.8)
 project(libfec ASM C)
 
 option(BUILD_32BIT_ON_64BIT "Build a 32-bit library on a 64-bit system" OFF)
+option(LIBFEC_INSTALL       "Install build artifacts"                   ON)
 
 # Select the release build type by default to get optimization flags
 if(NOT CMAKE_BUILD_TYPE)
@@ -13,7 +14,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "")
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 if(NOT LIB_INSTALL_DIR)
     set(LIB_INSTALL_DIR lib)
@@ -260,10 +261,12 @@ configure_file(
     @ONLY
 )
 
-install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/libfec.pc
-    DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/
-)
+if(LIBFEC_INSTALL)
+    install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/libfec.pc
+        DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/
+    )
+endif()
 
 
 ########################################################################
@@ -287,38 +290,41 @@ add_custom_command(
 )
 
 # libfec
-add_library(libfec_shared SHARED ${libfec_sources})
-set_target_properties(libfec_shared PROPERTIES OUTPUT_NAME fec)
-set_target_properties(libfec_shared PROPERTIES SOVERSION ${VERSION_INFO_MAJOR})
-target_link_libraries(libfec_shared ${M_LIB})
+add_library(libfec_static STATIC ${libfec_sources})
+set_target_properties(libfec_static PROPERTIES OUTPUT_NAME fec)
+set_target_properties(libfec_static PROPERTIES SOVERSION ${VERSION_INFO_MAJOR})
+target_link_libraries(libfec_static ${M_LIB})
 
-
-install(TARGETS libfec_shared
-    DESTINATION ${LIB_INSTALL_DIR})
-install(FILES "${PROJECT_SOURCE_DIR}/fec.h"
-    DESTINATION include)
-
+if(LIBFEC_INSTALL)
+    install(TARGETS libfec_static
+        DESTINATION ${LIB_INSTALL_DIR})
+    install(FILES "${PROJECT_SOURCE_DIR}/fec.h"
+        DESTINATION include)
+endif()
 
 ########################################################################
 # Create uninstall target
 ########################################################################
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+if(LIBFEC_INSTALL)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
 
-add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
 
 
 ########################################################################
 # Print Summary
 ########################################################################
-message(STATUS "")
-message(STATUS "##########################################################")
-message(STATUS "## Building for version: ${VERSION}")
-message(STATUS "## Target Architecture:  ${TARGET_ARCH}")
-message(STATUS "## Using install prefix: ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "##########################################################")
-message(STATUS "")
-
+if(LIBFEC_INSTALL)
+    message(STATUS "")
+    message(STATUS "##########################################################")
+    message(STATUS "## Building for version: ${VERSION}")
+    message(STATUS "## Target Architecture:  ${TARGET_ARCH}")
+    message(STATUS "## Using install prefix: ${CMAKE_INSTALL_PREFIX}")
+    message(STATUS "##########################################################")
+    message(STATUS "")
+endif()
