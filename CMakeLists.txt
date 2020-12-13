@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8)
 project(libfec ASM C)
 
 option(BUILD_32BIT_ON_64BIT "Build a 32-bit library on a 64-bit system" OFF)
-option(LIBFEC_INSTALL       "Install build artifacts"                   ON)
+option(LIBFEC_INSTALL       "Install build artifacts"                   OFF)
 
 # Select the release build type by default to get optimization flags
 if(NOT CMAKE_BUILD_TYPE)
@@ -276,16 +276,16 @@ endif()
 # generate ccsds_tab.c
 add_executable(gen_ccsds gen_ccsds.c init_rs_char.c)
 add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/ccsds_tab.c
-    COMMAND  ${CMAKE_BINARY_DIR}/gen_ccsds > ccsds_tab.c
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ccsds_tab.c
+    COMMAND  ${CMAKE_CURRENT_BINARY_DIR}/gen_ccsds > ccsds_tab.c
     DEPENDS  gen_ccsds
 )
 
 # generate ccsds_tal.c
 add_executable(gen_ccsds_tal gen_ccsds_tal.c)
 add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/ccsds_tal.c
-    COMMAND  ${CMAKE_BINARY_DIR}/gen_ccsds_tal > ccsds_tal.c
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ccsds_tal.c
+    COMMAND  ${CMAKE_CURRENT_BINARY_DIR}/gen_ccsds_tal > ccsds_tal.c
     DEPENDS  gen_ccsds_tal
 )
 
@@ -298,7 +298,7 @@ target_link_libraries(libfec_static ${M_LIB})
 if(LIBFEC_INSTALL)
     install(TARGETS libfec_static
         DESTINATION ${LIB_INSTALL_DIR})
-    install(FILES "${PROJECT_SOURCE_DIR}/fec.h"
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/fec.h"
         DESTINATION include)
 endif()
 
